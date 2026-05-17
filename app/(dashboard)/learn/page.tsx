@@ -283,7 +283,7 @@ export default function LearnPage() {
   }
 
   const totalTraps = 18
-  const addressedCount = Object.values(statuses).filter(s => s && s !== '').length
+  const addressedCount = Object.values(statuses).filter(s => s && (s as string) !== '').length
   const masteredCount = Object.values(statuses).filter(s => s === 'mastered').length
 
   return (
