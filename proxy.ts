@@ -19,12 +19,16 @@ export async function proxy(request: NextRequest) {
 
   const token = request.cookies.get(COOKIE_NAME)?.value
   if (!token) {
-    return NextResponse.redirect(new URL('/financial_freedom/login', request.url))
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
   const session = await verifySession(token)
   if (!session) {
-    const response = NextResponse.redirect(new URL('/financial_freedom/login', request.url))
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    const response = NextResponse.redirect(url)
     response.cookies.delete(COOKIE_NAME)
     return response
   }

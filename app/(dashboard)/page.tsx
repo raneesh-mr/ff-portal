@@ -160,7 +160,7 @@ export default function Dashboard() {
             </div>
             <div className="mt-2 flex justify-between text-xs" style={{ color: '#64748B' }}>
               <span>Remaining: {formatCompact(Math.max(target - current, 0), currency)}</span>
-              <Link href="/financial_freedom/goals" className="flex items-center gap-1 hover:text-amber-400 transition-colors">
+              <Link href="/goals" className="flex items-center gap-1 hover:text-amber-400 transition-colors">
                 View details <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
@@ -186,7 +186,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold" style={{ color: '#94A3B8' }}>OTHER GOALS</h2>
-            <Link href="/financial_freedom/goals" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
+            <Link href="/goals" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {otherGoals.map(goal => {
@@ -217,7 +217,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold" style={{ color: '#94A3B8' }}>UPCOMING PAYMENTS</h2>
-            <Link href="/financial_freedom/payments" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
+            <Link href="/payments" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
           </div>
           <div className="space-y-2">
             {upcomingPayments.map(p => {
@@ -244,13 +244,13 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3 pb-4">
-        <Link href="/financial_freedom/investments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))', border: '1px solid rgba(16,185,129,0.2)' }}>
+        <Link href="/investments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))', border: '1px solid rgba(16,185,129,0.2)' }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.2)' }}>
             <Plus className="w-4 h-4" style={{ color: '#10B981' }} />
           </div>
           <span className="text-sm font-medium" style={{ color: '#34D399' }}>Add Investment</span>
         </Link>
-        <Link href="/financial_freedom/payments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05))', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <Link href="/payments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05))', border: '1px solid rgba(239,68,68,0.2)' }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
             <Plus className="w-4 h-4" style={{ color: '#EF4444' }} />
           </div>
