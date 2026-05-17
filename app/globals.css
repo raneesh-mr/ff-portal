@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0A0E27;
+  --bg-card: #111827;
+  --bg-card-hover: #1a2235;
+  --border-subtle: #1E2A3A;
+  --gold: #C9A84C;
+  --gold-light: #F5D080;
+  --emerald: #10B981;
+  --red: #EF4444;
+  --amber: #F59E0B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg
