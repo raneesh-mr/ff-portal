@@ -3,4 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   basePath: '/financial_freedom',
   images: {
-    remotePat
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'rgpadkgvakcenqexwjzn.supabase.co',
+      },
+    ],
+  },
+};
+
+export default nextConfig;
