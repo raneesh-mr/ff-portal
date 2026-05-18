@@ -287,7 +287,7 @@ export default function LearnPage() {
   const masteredCount = Object.values(statuses).filter(s => s === 'mastered').length
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-8">
       {/* Hero */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Know Your Money Mind</h1>

@@ -207,14 +207,14 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="w-full px-8 py-8">
         <div className="glass-card rounded-2xl h-96 animate-pulse" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-8">
       <h1 className="text-3xl font-bold text-white mb-6">Settings</h1>
 
       {/* Tab nav */}

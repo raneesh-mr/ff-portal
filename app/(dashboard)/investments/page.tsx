@@ -404,7 +404,7 @@ export default function InvestmentsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-8">
       {/* Header summary card */}
       <div className="glass-card rounded-2xl p-6 mb-6">
         <div className="grid grid-cols-3 gap-4">

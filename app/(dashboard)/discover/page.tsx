@@ -165,7 +165,7 @@ export default function DiscoverPage() {
   const ai = analysis?.analysis_json
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="w-full px-8 py-8">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-2 mb-2">
