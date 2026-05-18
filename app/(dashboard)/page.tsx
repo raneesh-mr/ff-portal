@@ -313,7 +313,7 @@ export default function Dashboard() {
       {data && data.payments.filter(p => p.status !== 'paid').length > 0 && (() => {
         const upcoming = data.payments
           .filter(p => p.status !== 'paid')
-          .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+          .sort((a, b) => new Date(a.due_date ?? '9999').getTime() - new Date(b.due_date ?? '9999').getTime())
           .slice(0, 5)
         return (
           <div style={card}>
