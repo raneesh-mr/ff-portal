@@ -218,9 +218,10 @@ function GoalCard({
   const [history, setHistory] = useState<GoalHistory[]>([])
   const [historyLoaded, setHistoryLoaded] = useState(false)
 
-  const progress = goal.target_amount > 0 ? Math.min((goal.current_amount / goal.target_amount) * 100, 100) : 0
-  const days = daysRemaining(goal.target_date)
-  const isOverdue = days < 0
+  const currentAmount = goal.current_amount || 0
+  const progress = goal.target_amount > 0 ? Math.min((currentAmount / goal.target_amount) * 100, 100) : 0
+  const days = goal.target_date ? daysRemaining(goal.target_date) : null
+  const isOverdue = days !== null && days < 0
   const wealthMode = progress >= 80
 
   async function loadHistory() {
@@ -239,7 +240,7 @@ function GoalCard({
     }
   }
 
-  const projectedValue = calcProjection(goal.current_amount, selectedRate, Math.max(days, 0))
+  const projectedValue = goal.target_date ? calcProjection(currentAmount, selectedRate, Math.max(days ?? 0, 0)) : null
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden mb-4">
@@ -297,7 +298,7 @@ function GoalCard({
           <div>
             <p className="text-slate-500 text-xs mb-0.5">Current</p>
             <p className="font-semibold text-white">
-              {goal.currency} {(goal.current_amount || 0).toLocaleString()}
+              {goal.currency} {currentAmount.toLocaleString()}
             </p>
           </div>
           <div>
@@ -307,41 +308,43 @@ function GoalCard({
             </p>
           </div>
           <div>
-            <p className="text-slate-500 text-xs mb-0.5">{isOverdue ? 'Overdue' : 'Remaining'}</p>
+            <p className="text-slate-500 text-xs mb-0.5">{isOverdue ? 'Overdue' : days !== null ? 'Remaining' : 'Deadline'}</p>
             <p className={`font-semibold ${isOverdue ? 'text-red-400' : 'text-slate-300'}`}>
-              {isOverdue ? `${Math.abs(days)}d ago` : `${days}d`}
+              {days === null ? 'Not set' : isOverdue ? `${Math.abs(days)}d ago` : `${days}d`}
             </p>
           </div>
         </div>
 
-        {/* Compounding projection */}
-        <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 mb-3">
-          <p className="text-xs text-slate-500 mb-2 uppercase tracking-wide">Compounding Projection</p>
-          <div className="flex gap-2 mb-3">
-            {RATES.map(r => (
-              <button
-                key={r}
-                onClick={() => setSelectedRate(r)}
-                className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
-                  selectedRate === r
-                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
-                    : 'border border-slate-700 text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                {r}%
-              </button>
-            ))}
+        {/* Compounding projection — only show when target date is set */}
+        {projectedValue !== null && (
+          <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 mb-3">
+            <p className="text-xs text-slate-500 mb-2 uppercase tracking-wide">Compounding Projection</p>
+            <div className="flex gap-2 mb-3">
+              {RATES.map(r => (
+                <button
+                  key={r}
+                  onClick={() => setSelectedRate(r)}
+                  className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
+                    selectedRate === r
+                      ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50'
+                      : 'border border-slate-700 text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  {r}%
+                </button>
+              ))}
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-0.5">Projected value at target date</p>
+              <p className="text-lg font-bold text-emerald-400">
+                {goal.currency} {projectedValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-xs text-slate-600 mt-0.5">
+                @ {selectedRate}% p.a. over {Math.max(days ?? 0, 0)} days
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-slate-500 mb-0.5">Projected value at target date</p>
-            <p className="text-lg font-bold text-emerald-400">
-              {goal.currency} {projectedValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-            </p>
-            <p className="text-xs text-slate-600 mt-0.5">
-              @ {selectedRate}% p.a. over {Math.max(days, 0)} days
-            </p>
-          </div>
-        </div>
+        )}
 
         {/* History toggle */}
         <button

@@ -111,18 +111,6 @@ export default function Dashboard() {
           }
           <span style={{ color: '#475569', fontSize: '0.75rem' }}>vs invested</span>
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-4 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div>
-            <p style={{ color: '#64748B', fontSize: '0.75rem' }}>Invested</p>
-            <p className="font-semibold">{formatCompact(totalInvested, currency)}</p>
-          </div>
-          <div>
-            <p style={{ color: '#64748B', fontSize: '0.75rem' }}>Gain / Loss</p>
-            <p className="font-semibold" style={{ color: totalGain >= 0 ? '#10B981' : '#EF4444' }}>
-              {totalGain >= 0 ? '+' : ''}{formatCompact(totalGain, currency)}
-            </p>
-          </div>
-        </div>
         {rateUpdated && <p className="text-xs mt-3" style={{ color: '#475569' }}>₹1 = AED {(1/data!.exchangeRate).toFixed(4)} · Rate updated {rateUpdated}</p>}
       </div>
 
@@ -208,6 +196,57 @@ export default function Dashboard() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Investments Breakdown */}
+      {data && data.investments.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold" style={{ color: '#94A3B8' }}>INVESTMENTS</h2>
+            <Link href="/investments" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
+          </div>
+          <div className="rounded-2xl overflow-hidden" style={{ background: '#111827', border: '1px solid #1E2A3A' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  {['Platform', 'Type', 'Invested', 'Current', 'P&L'].map((h, i) => (
+                    <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wider" style={{ color: '#475569', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.investments.map((inv, idx) => {
+                  const invested = convert(inv.invested_amount, inv.currency)
+                  const current = convert(inv.current_value, inv.currency)
+                  const gain = current - invested
+                  return (
+                    <tr key={inv.id} style={{ borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.04)' : undefined }}>
+                      <td className="px-4 py-3 font-medium" style={{ color: '#CBD5E1' }}>{inv.platform}</td>
+                      <td className="px-4 py-3">
+                        <span className="chip chip-gold text-xs" style={{ fontSize: '10px', padding: '1px 7px' }}>{inv.type}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right" style={{ color: '#64748B' }}>{formatCompact(invested, currency)}</td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: '#E2E8F0' }}>{formatCompact(current, currency)}</td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: gain > 0 ? '#10B981' : gain < 0 ? '#EF4444' : '#64748B' }}>
+                        {gain > 0 ? '+' : ''}{formatCompact(gain, currency)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              <tfoot>
+                <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <td colSpan={2} className="px-4 py-3 text-xs" style={{ color: '#475569' }}>Total</td>
+                  <td className="px-4 py-3 text-right text-xs" style={{ color: '#64748B' }}>{formatCompact(totalInvested, currency)}</td>
+                  <td className="px-4 py-3 text-right font-semibold" style={{ color: '#F5D080' }}>{formatCompact(totalCurrent, currency)}</td>
+                  <td className="px-4 py-3 text-right font-semibold" style={{ color: totalGain >= 0 ? '#10B981' : '#EF4444' }}>
+                    {totalGain >= 0 ? '+' : ''}{formatCompact(totalGain, currency)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
       )}
