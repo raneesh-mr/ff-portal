@@ -15,7 +15,7 @@ interface DashboardData {
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
-  const [currency, setCurrency] = useState<'AED' | 'INR'>('AED')
+  const [currency, setCurrency] = useState<'AED' | 'INR'>('INR')
   const [loading, setLoading] = useState(true)
   const [rateUpdated, setRateUpdated] = useState('')
 
