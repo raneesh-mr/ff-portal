@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Crown, Plus, Edit2, Trash2, ChevronDown, ChevronUp, Upload, X, Check } from 'lucide-react'
+import EmailReportButton from '@/components/EmailReportButton'
 
 interface GoalHistory {
   id: string
@@ -462,9 +463,12 @@ export default function GoalsPage() {
           <h1 className="text-3xl font-bold text-white mb-1">Your Goals</h1>
           <p className="text-slate-500 text-sm">{goals.length} goal{goals.length !== 1 ? 's' : ''} defined</p>
         </div>
-        <button onClick={openAdd} className="btn-gold flex items-center gap-2">
-          <Plus size={16} /> Add Goal
-        </button>
+        <div className="flex items-center gap-2">
+          <EmailReportButton type="goals" />
+          <button onClick={openAdd} className="btn-gold flex items-center gap-2">
+            <Plus size={16} /> Add Goal
+          </button>
+        </div>
       </div>
 
       {/* Goals list */}

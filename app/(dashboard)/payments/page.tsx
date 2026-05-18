@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, CheckCircle, X } from 'lucide-react'
+import EmailReportButton from '@/components/EmailReportButton'
 
 interface Payment {
   id: string
@@ -372,9 +373,12 @@ export default function PaymentsPage() {
             Due this month: <span className="text-red-400 font-semibold">AED {dueTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
           </p>
         </div>
-        <button onClick={() => { setEditPayment(null); setModalOpen(true) }} className="btn-gold flex items-center gap-2">
-          <Plus size={16} /> Add
-        </button>
+        <div className="flex items-center gap-2">
+          <EmailReportButton type="payments" />
+          <button onClick={() => { setEditPayment(null); setModalOpen(true) }} className="btn-gold flex items-center gap-2">
+            <Plus size={16} /> Add
+          </button>
+        </div>
       </div>
 
       {/* Monthly breakdown bar */}

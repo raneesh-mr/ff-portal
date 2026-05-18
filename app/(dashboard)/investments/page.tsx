@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, TrendingUp, TrendingDown, ChevronDown, ChevronUp, X } from 'lucide-react'
+import EmailReportButton from '@/components/EmailReportButton'
 
 interface Goal {
   id: string
@@ -428,9 +429,12 @@ export default function InvestmentsPage() {
       {/* Page header + add button */}
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-white">Investments</h1>
-        <button onClick={() => { setEditInv(null); setModalOpen(true) }} className="btn-gold flex items-center gap-2">
-          <Plus size={16} /> Add
-        </button>
+        <div className="flex items-center gap-2">
+          <EmailReportButton type="investments" />
+          <button onClick={() => { setEditInv(null); setModalOpen(true) }} className="btn-gold flex items-center gap-2">
+            <Plus size={16} /> Add
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

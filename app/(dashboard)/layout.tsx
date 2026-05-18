@@ -71,6 +71,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
+
+        <a
+          href="https://www.raneesh.net"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 text-center block transition-opacity hover:opacity-80"
+          style={{ fontSize: '10px', color: '#334155', lineHeight: 1.5 }}
+        >
+          made with passion<br />
+          <span style={{ color: '#475569' }}>www.raneesh.net</span>
+        </a>
       </aside>
 
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0">

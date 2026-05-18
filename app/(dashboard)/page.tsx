@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { formatCompact, calcXIRR, monthsBetween } from '@/lib/utils'
 import { Goal, Investment, Payment } from '@/types'
+import EmailReportButton from '@/components/EmailReportButton'
 
 interface DashboardData {
   goals: Goal[]
@@ -111,12 +112,15 @@ export default function Dashboard() {
           <div style={{ fontSize: '12px', color: '#64748B' }}>{greeting},</div>
           <div style={{ fontSize: '20px', fontWeight: 500, color: '#F8FAFC' }}>{data?.userName || 'Raneesh'}</div>
         </div>
-        <button
-          onClick={() => setCurrency(c => c === 'AED' ? 'INR' : 'AED')}
-          style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '0.5px solid #1E2A3A', color: '#94A3B8', background: 'transparent', cursor: 'pointer' }}
-        >
-          {currency} view
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <EmailReportButton type="dashboard" />
+          <button
+            onClick={() => setCurrency(c => c === 'AED' ? 'INR' : 'AED')}
+            style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '0.5px solid #1E2A3A', color: '#94A3B8', background: 'transparent', cursor: 'pointer' }}
+          >
+            {currency} view
+          </button>
+        </div>
       </div>
 
       {/* ── Main card: KPIs + Overall Progress + Goals ── */}
