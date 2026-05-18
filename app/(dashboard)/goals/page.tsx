@@ -502,4 +502,11 @@ export default function GoalsPage() {
       {saving && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="glass-card rounded-xl px-8 py-6 text-center">
-            <div className="animate-spin w-8 h-8 border-2 bord
+            <div className="animate-spin w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full mx-auto mb-3" />
+            <p className="text-slate-300">Saving...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
