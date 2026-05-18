@@ -1,8 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { TrendingUp, TrendingDown, Target, Zap, RefreshCw, ArrowUpRight, Plus } from 'lucide-react'
-import Link from 'next/link'
-import { formatCurrency, formatCompact, calcXIRR, monthsBetween, daysUntil } from '@/lib/utils'
+import { formatCompact, calcXIRR, monthsBetween } from '@/lib/utils'
 import { Goal, Investment, Payment } from '@/types'
 
 interface DashboardData {
@@ -13,11 +11,35 @@ interface DashboardData {
   userName: string
 }
 
+const GOAL_COLORS = ['#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6']
+
+function formatTimeLeft(targetDate: string): string {
+  const now = new Date()
+  const target = new Date(targetDate)
+  const totalMonths = Math.max(
+    0,
+    (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth())
+  )
+  const years = Math.floor(totalMonths / 12)
+  const months = totalMonths % 12
+  if (years === 0) return `${months} mo`
+  if (months === 0) return `${years} yr${years !== 1 ? 's' : ''}`
+  return `${years} yr${years !== 1 ? 's' : ''} ${months} mo`
+}
+
+function monthsUntil(targetDate: string): number {
+  const now = new Date()
+  const target = new Date(targetDate)
+  return Math.max(
+    0,
+    (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth())
+  )
+}
+
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [currency, setCurrency] = useState<'AED' | 'INR'>('INR')
   const [loading, setLoading] = useState(true)
-  const [rateUpdated, setRateUpdated] = useState('')
 
   useEffect(() => { fetchData() }, [])
 
@@ -31,10 +53,15 @@ export default function Dashboard() {
         fetch('/financial_freedom/api/exchange-rate'),
       ])
       const [goals, investments, payments, rateData] = await Promise.all([
-        goalsRes.json(), invRes.json(), payRes.json(), rateRes.json()
+        goalsRes.json(), invRes.json(), payRes.json(), rateRes.json(),
       ])
-      setData({ goals: goals.data || [], investments: investments.data || [], payments: payments.data || [], exchangeRate: rateData.rate || 24, userName: rateData.userName || 'Raneesh' })
-      if (rateData.fetched_at) setRateUpdated(new Date(rateData.fetched_at).toLocaleTimeString())
+      setData({
+        goals: goals.data || [],
+        investments: investments.data || [],
+        payments: payments.data || [],
+        exchangeRate: rateData.rate || 24,
+        userName: rateData.userName || 'Raneesh',
+      })
     } catch { /* silent */ }
     setLoading(false)
   }
@@ -47,255 +74,237 @@ export default function Dashboard() {
   }
 
   const totalInvested = data?.investments.reduce((s, i) => s + convert(i.invested_amount, i.currency), 0) || 0
-  const totalCurrent = data?.investments.reduce((s, i) => s + convert(i.current_value, i.currency), 0) || 0
-  const totalGain = totalCurrent - totalInvested
-  const gainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0
+  const totalCurrent  = data?.investments.reduce((s, i) => s + convert(i.current_value,   i.currency), 0) || 0
+  const totalGain     = totalCurrent - totalInvested
+  const gainPct       = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0
+  const totalTarget   = data?.goals.reduce((s, g) => s + convert(g.target_amount, g.currency), 0) || 0
+  const overallPct    = totalTarget > 0 ? Math.min((totalCurrent / totalTarget) * 100, 100) : 0
+  const gap           = Math.max(totalTarget - totalCurrent, 0)
 
-  const primaryGoal = data?.goals.find(g => g.is_primary)
-  const otherGoals = data?.goals.filter(g => !g.is_primary) || []
+  const hour     = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
-  // Months invested (from earliest investment)
-  const monthsInvested = data?.investments.length
-    ? monthsBetween(
-        new Date(Math.min(...data.investments.map(i => new Date(i.month).getTime()))),
-        new Date()
-      )
-    : 0
-
-  const upcomingPayments = data?.payments
-    .filter(p => p.status !== 'paid')
-    .sort((a, b) => new Date(a.due_date || '').getTime() - new Date(b.due_date || '').getTime())
-    .slice(0, 3) || []
-
-  const getHour = () => new Date().getHours()
-  const greeting = getHour() < 12 ? 'Good morning' : getHour() < 17 ? 'Good afternoon' : 'Good evening'
+  // Shared inline style tokens
+  const card:  React.CSSProperties = { background: '#111827', border: '0.5px solid #1E2A3A', borderRadius: '12px', padding: '16px' }
+  const tile:  React.CSSProperties = { background: '#0D1420', border: '0.5px solid #1E2A3A', borderRadius: '8px', padding: '10px' }
+  const lbl:   React.CSSProperties = { fontSize: '10px', color: '#64748B', marginBottom: '3px' }
+  const val:   React.CSSProperties = { fontSize: '15px', fontWeight: 500, color: '#F8FAFC' }
+  const sub:   React.CSSProperties = { fontSize: '10px', color: '#475569' }
+  const div14: React.CSSProperties = { borderTop: '0.5px solid #1E2A3A', margin: '14px 0' }
+  const secLbl:React.CSSProperties = { fontSize: '11px', fontWeight: 500, color: '#64748B', letterSpacing: '0.05em' }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="text-center">
-        <div className="w-12 h-12 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: '#C9A84C', borderTopColor: 'transparent' }} />
-        <p style={{ color: '#64748B' }}>Loading your wealth dashboard...</p>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 40, height: 40, border: '2px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: '#64748B', fontSize: '13px' }}>Loading...</p>
       </div>
     </div>
   )
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div style={{ padding: '16px', maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <p style={{ color: '#64748B', fontSize: '0.875rem' }}>{greeting},</p>
-          <h1 className="text-2xl font-bold text-gold-gradient">{data?.userName || 'Raneesh'} 👋</h1>
-          <p style={{ color: '#475569', fontSize: '0.75rem' }}>{new Date().toLocaleDateString('en-AE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <div style={{ fontSize: '12px', color: '#64748B' }}>{greeting},</div>
+          <div style={{ fontSize: '20px', fontWeight: 500, color: '#F8FAFC' }}>{data?.userName || 'Raneesh'}</div>
         </div>
         <button
           onClick={() => setCurrency(c => c === 'AED' ? 'INR' : 'AED')}
-          className="btn-ghost text-sm flex items-center gap-2"
+          style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '6px', border: '0.5px solid #1E2A3A', color: '#94A3B8', background: 'transparent', cursor: 'pointer' }}
         >
-          <RefreshCw className="w-3 h-3" />
-          {currency === 'AED' ? '🇦🇪 AED' : '🇮🇳 INR'}
+          {currency} view
         </button>
       </div>
 
-      {/* Portfolio Summary Card */}
-      <div className="rounded-2xl p-6 glow-gold" style={{ background: 'linear-gradient(135deg, #111827, #1a2235)', border: '1px solid rgba(201,168,76,0.3)' }}>
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-medium" style={{ color: '#94A3B8' }}>Total Portfolio Value</p>
-          <span className="chip chip-gold text-xs">Live</span>
-        </div>
-        <p className="text-4xl font-bold mb-1 animate-count text-gold-gradient">{formatCompact(totalCurrent, currency)}</p>
-        <div className="flex items-center gap-3 mt-2">
-          {totalGain >= 0
-            ? <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: '#10B981' }}><TrendingUp className="w-4 h-4" />+{formatCompact(totalGain, currency)} ({gainPct.toFixed(1)}%)</span>
-            : <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: '#EF4444' }}><TrendingDown className="w-4 h-4" />{formatCompact(totalGain, currency)} ({gainPct.toFixed(1)}%)</span>
-          }
-          <span style={{ color: '#475569', fontSize: '0.75rem' }}>vs invested</span>
-        </div>
-        {rateUpdated && <p className="text-xs mt-3" style={{ color: '#475569' }}>₹1 = AED {(1/data!.exchangeRate).toFixed(4)} · Rate updated {rateUpdated}</p>}
-      </div>
+      {/* ── Main card: KPIs + Overall Progress + Goals ── */}
+      <div style={card}>
 
-      {/* Primary Goal */}
-      {primaryGoal && (() => {
-        const current = convert(totalCurrent, currency)
-        const target = convert(primaryGoal.target_amount, primaryGoal.currency)
-        const pct = Math.min((current / target) * 100, 100)
-        const days = primaryGoal.target_date ? daysUntil(primaryGoal.target_date) : null
-        return (
-          <div className="rounded-2xl p-5" style={{ background: '#111827', border: '1px solid #1E2A3A' }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4" style={{ color: '#C9A84C' }} />
-                <span className="text-sm font-semibold" style={{ color: '#C9A84C' }}>PRIMARY GOAL</span>
-              </div>
-              {days !== null && (
-                <span className={`chip text-xs ${days < 0 ? 'chip-red' : days < 90 ? 'chip-amber' : 'chip-green'}`}>
-                  {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}
-                </span>
-              )}
+        {/* 4 KPI Tiles */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+          <div style={tile}>
+            <div style={lbl}>Total target</div>
+            <div style={val}>{formatCompact(totalTarget, currency)}</div>
+            <div style={sub}>{data?.goals.length || 0} goal{(data?.goals.length || 0) !== 1 ? 's' : ''}</div>
+          </div>
+          <div style={tile}>
+            <div style={lbl}>Invested</div>
+            <div style={val}>{formatCompact(totalInvested, currency)}</div>
+            <div style={sub}>capital deployed</div>
+          </div>
+          <div style={tile}>
+            <div style={lbl}>Current value</div>
+            <div style={val}>{formatCompact(totalCurrent, currency)}</div>
+            <div style={sub}>market value</div>
+          </div>
+          <div style={tile}>
+            <div style={lbl}>Profit</div>
+            <div style={{ ...val, color: totalGain >= 0 ? '#10B981' : '#EF4444' }}>
+              {totalGain >= 0 ? '+' : ''}{formatCompact(totalGain, currency)}
             </div>
-            {primaryGoal.image_url && (
-              <div className="w-full h-32 rounded-xl mb-3 overflow-hidden">
-                <img src={primaryGoal.image_url} alt={primaryGoal.name} className="w-full h-full object-cover" />
+            <div style={{ ...sub, color: totalGain >= 0 ? '#10B981' : '#EF4444' }}>
+              {totalGain >= 0 ? '+' : ''}{gainPct.toFixed(1)}%
+            </div>
+          </div>
+        </div>
+
+        {/* Overall Progress */}
+        <div style={{ ...tile, marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+            <div style={secLbl}>
+              OVERALL PROGRESS — {formatCompact(totalCurrent, currency)} of {formatCompact(totalTarget, currency)}
+            </div>
+            <div style={{ fontSize: '12px', fontWeight: 500, color: '#F8FAFC' }}>{overallPct.toFixed(1)}%</div>
+          </div>
+
+          {/* Segmented bar */}
+          <div style={{ position: 'relative', height: '28px', background: '#1E2A3A', borderRadius: '6px', overflow: 'hidden', marginBottom: '10px' }}>
+            {(() => {
+              let offset = 0
+              return data?.goals.map((goal, idx) => {
+                const linkedInv  = data.investments.filter(i => i.goal_id === goal.id)
+                const goalCurrent = linkedInv.reduce((s, i) => s + convert(i.current_value, i.currency), 0)
+                const segW = totalTarget > 0 ? (goalCurrent / totalTarget) * 100 : 0
+                const left = offset
+                offset += segW
+                const color = GOAL_COLORS[idx % GOAL_COLORS.length]
+                return segW > 0 ? (
+                  <div key={goal.id} style={{ position: 'absolute', left: `${left}%`, top: 0, height: '100%', width: `${segW}%`, background: color, display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>
+                    {idx === 0 && <span style={{ fontSize: '10px', color: '#fff', whiteSpace: 'nowrap' }}>{goal.name.split(' ')[0]}</span>}
+                  </div>
+                ) : null
+              })
+            })()}
+            {gap > 0 && (
+              <div style={{ position: 'absolute', right: '8px', top: 0, height: '100%', display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: '10px', color: '#475569' }}>{formatCompact(gap, currency)} remaining</span>
               </div>
             )}
-            <h3 className="text-lg font-bold mb-3">{primaryGoal.name}</h3>
-            <div className="flex items-end justify-between mb-2">
-              <span className="text-2xl font-bold text-gold-gradient">{pct.toFixed(1)}%</span>
-              <span className="text-sm" style={{ color: '#64748B' }}>{formatCompact(current, currency)} / {formatCompact(target, currency)}</span>
-            </div>
-            <div className="h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <div className="h-full rounded-full animate-progress" style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #C9A84C, #F5D080)' }} />
-            </div>
-            <div className="mt-2 flex justify-between text-xs" style={{ color: '#64748B' }}>
-              <span>Remaining: {formatCompact(Math.max(target - current, 0), currency)}</span>
-              <Link href="/goals" className="flex items-center gap-1 hover:text-amber-400 transition-colors">
-                View details <ArrowUpRight className="w-3 h-3" />
-              </Link>
-            </div>
           </div>
-        )
-      })()}
 
-      {/* Consistency Streak */}
-      {monthsInvested > 0 && (
-        <div className="rounded-2xl p-4 flex items-center gap-4" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.2)' }}>
-            <Zap className="w-5 h-5" style={{ color: '#10B981' }} />
-          </div>
-          <div>
-            <p className="font-semibold" style={{ color: '#34D399' }}>🔥 {monthsInvested} Month Streak!</p>
-            <p className="text-xs" style={{ color: '#64748B' }}>You've been consistently invested — this patience is your edge.</p>
+          {/* Legend — Gap only */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ width: '12px', height: '12px', background: '#1E2A3A', borderRadius: '3px', flexShrink: 0 }} />
+            <span style={{ fontSize: '11px', color: '#64748B' }}>Gap — {formatCompact(gap, currency)} to go</span>
           </div>
         </div>
-      )}
 
-      {/* Other Goals */}
-      {otherGoals.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold" style={{ color: '#94A3B8' }}>OTHER GOALS</h2>
-            <Link href="/goals" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {otherGoals.map(goal => {
-              const linkedInv = data?.investments.filter(i => i.goal_id === goal.id) || []
-              const current = linkedInv.reduce((s, i) => s + convert(i.current_value, i.currency), 0)
-              const target = convert(goal.target_amount, goal.currency)
-              const pct = Math.min((current / target) * 100, 100)
-              return (
-                <div key={goal.id} className="rounded-xl p-4" style={{ background: '#111827', border: '1px solid #1E2A3A' }}>
-                  {goal.image_url && <img src={goal.image_url} alt={goal.name} className="w-full h-20 object-cover rounded-lg mb-2" />}
-                  <h3 className="font-medium text-sm mb-2">{goal.name}</h3>
-                  <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : 'linear-gradient(90deg, #C9A84C, #F5D080)' }} />
-                  </div>
-                  <div className="flex justify-between text-xs" style={{ color: '#64748B' }}>
-                    <span>{pct.toFixed(0)}%</span>
-                    <span>{formatCompact(target, goal.currency)}</span>
+        {/* Per-goal rows */}
+        {data?.goals.map((goal, idx) => {
+          const color       = GOAL_COLORS[idx % GOAL_COLORS.length]
+          const linkedInv   = data.investments.filter(i => i.goal_id === goal.id)
+          const goalCurrent = linkedInv.reduce((s, i) => s + convert(i.current_value, i.currency), 0)
+          const goalTarget  = convert(goal.target_amount, goal.currency)
+          const goalPct     = goalTarget > 0 ? Math.min((goalCurrent / goalTarget) * 100, 100) : 0
+          const timeLeft    = goal.target_date ? formatTimeLeft(goal.target_date) : null
+          const monthsLeft  = goal.target_date ? monthsUntil(goal.target_date) : null
+          const needPerMonth = (monthsLeft && monthsLeft > 0) ? (goalTarget - goalCurrent) / monthsLeft : null
+
+          return (
+            <div key={goal.id}>
+              <div style={div14} />
+
+              {/* Goal header row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '12px', height: '12px', background: color, borderRadius: '3px', flexShrink: 0 }} />
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#F8FAFC' }}>{goal.name}</span>
+                  {goal.target_date && (
+                    <span style={{ fontSize: '11px', color: '#64748B' }}>
+                      by {new Date(goal.target_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '12px', fontWeight: 500, color }}>{goalPct.toFixed(0)}%</span>
+              </div>
+
+              {/* Goal progress bar */}
+              <div style={{ height: '6px', background: '#1E2A3A', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+                <div style={{ width: `${goalPct}%`, height: '100%', background: color, borderRadius: '4px' }} />
+              </div>
+
+              {/* 4 sub-tiles */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
+                <div style={tile}>
+                  <div style={lbl}>Target</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: '#F8FAFC' }}>{formatCompact(goalTarget, currency)}</div>
+                </div>
+                <div style={tile}>
+                  <div style={lbl}>Current</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: '#F8FAFC' }}>{formatCompact(goalCurrent, currency)}</div>
+                </div>
+                <div style={tile}>
+                  <div style={lbl}>Time left</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: '#F8FAFC' }}>{timeLeft || 'Not set'}</div>
+                </div>
+                <div style={tile}>
+                  <div style={lbl}>Need / month</div>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: needPerMonth !== null ? '#F59E0B' : '#475569' }}>
+                    {needPerMonth !== null ? formatCompact(needPerMonth, currency) : '—'}
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
+              </div>
+            </div>
+          )
+        })}
 
-      {/* Investments Breakdown */}
-      {data && data.investments.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold" style={{ color: '#94A3B8' }}>INVESTMENTS</h2>
-            <Link href="/investments" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
-          </div>
-          <div className="rounded-2xl overflow-hidden" style={{ background: '#111827', border: '1px solid #1E2A3A' }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  {['Platform', 'Type', 'Invested', 'Current', 'P&L'].map((h, i) => (
-                    <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wider" style={{ color: '#475569', textAlign: i >= 2 ? 'right' : 'left' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.investments.map((inv, idx) => {
-                  const invested = convert(inv.invested_amount, inv.currency)
-                  const current = convert(inv.current_value, inv.currency)
-                  const gain = current - invested
-                  return (
-                    <tr key={inv.id} style={{ borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.04)' : undefined }}>
-                      <td className="px-4 py-3 font-medium" style={{ color: '#CBD5E1' }}>{inv.platform}</td>
-                      <td className="px-4 py-3">
-                        <span className="chip chip-gold text-xs" style={{ fontSize: '10px', padding: '1px 7px' }}>{inv.type}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right" style={{ color: '#64748B' }}>{formatCompact(invested, currency)}</td>
-                      <td className="px-4 py-3 text-right font-semibold" style={{ color: '#E2E8F0' }}>{formatCompact(current, currency)}</td>
-                      <td className="px-4 py-3 text-right font-semibold" style={{ color: gain > 0 ? '#10B981' : gain < 0 ? '#EF4444' : '#64748B' }}>
-                        {gain > 0 ? '+' : ''}{formatCompact(gain, currency)}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-              <tfoot>
-                <tr style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <td colSpan={2} className="px-4 py-3 text-xs" style={{ color: '#475569' }}>Total</td>
-                  <td className="px-4 py-3 text-right text-xs" style={{ color: '#64748B' }}>{formatCompact(totalInvested, currency)}</td>
-                  <td className="px-4 py-3 text-right font-semibold" style={{ color: '#F5D080' }}>{formatCompact(totalCurrent, currency)}</td>
-                  <td className="px-4 py-3 text-right font-semibold" style={{ color: totalGain >= 0 ? '#10B981' : '#EF4444' }}>
-                    {totalGain >= 0 ? '+' : ''}{formatCompact(totalGain, currency)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Upcoming Payments */}
-      {upcomingPayments.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold" style={{ color: '#94A3B8' }}>UPCOMING PAYMENTS</h2>
-            <Link href="/payments" className="text-xs" style={{ color: '#C9A84C' }}>View all →</Link>
-          </div>
-          <div className="space-y-2">
-            {upcomingPayments.map(p => {
-              const days = p.due_date ? daysUntil(p.due_date) : null
-              return (
-                <div key={p.id} className="rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: '#111827', border: '1px solid #1E2A3A' }}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{p.icon}</span>
-                    <div>
-                      <p className="text-sm font-medium">{p.name}</p>
-                      <p className="text-xs" style={{ color: '#64748B' }}>{p.category} · {days !== null ? (days < 0 ? `${Math.abs(days)}d overdue` : `Due in ${days}d`) : 'No date'}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">{formatCurrency(p.amount, p.currency)}</p>
-                    <span className={`chip text-xs ${p.status === 'overdue' ? 'chip-red' : 'chip-amber'}`}>{p.status}</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3 pb-4">
-        <Link href="/investments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05))', border: '1px solid rgba(16,185,129,0.2)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.2)' }}>
-            <Plus className="w-4 h-4" style={{ color: '#10B981' }} />
-          </div>
-          <span className="text-sm font-medium" style={{ color: '#34D399' }}>Add Investment</span>
-        </Link>
-        <Link href="/payments" className="rounded-xl p-4 flex items-center gap-3 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05))', border: '1px solid rgba(239,68,68,0.2)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
-            <Plus className="w-4 h-4" style={{ color: '#EF4444' }} />
-          </div>
-          <span className="text-sm font-medium" style={{ color: '#F87171' }}>Add Payment</span>
-        </Link>
       </div>
+
+      {/* ── Investment Breakdown ── */}
+      {data && data.investments.length > 0 && (
+        <div style={card}>
+          <div style={{ ...secLbl, marginBottom: '12px' }}>INVESTMENT BREAKDOWN</div>
+
+          {/* Column headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '6px', padding: '0 6px', marginBottom: '6px' }}>
+            {['Platform', 'Invested', 'Current', 'P / L', 'XIRR'].map((h, i) => (
+              <div key={h} style={{ fontSize: '10px', color: '#475569', textAlign: i > 0 ? 'right' : 'left' }}>{h}</div>
+            ))}
+          </div>
+
+          {/* Rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {data.investments.map(inv => {
+              const invested   = convert(inv.invested_amount, inv.currency)
+              const current    = convert(inv.current_value, inv.currency)
+              const gain       = current - invested
+              const months     = monthsBetween(new Date(inv.month), new Date())
+              const xirr       = calcXIRR(invested, current, months)
+              const gainColor  = gain > 0 ? '#10B981' : gain < 0 ? '#EF4444' : '#475569'
+              return (
+                <div key={inv.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '6px', background: '#0D1420', border: '0.5px solid #1E2A3A', borderRadius: '8px', padding: '9px 10px', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#F8FAFC' }}>{inv.platform}</div>
+                    <div style={{ fontSize: '10px', color: '#64748B' }}>{inv.type}</div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748B',  textAlign: 'right' }}>{formatCompact(invested, currency)}</div>
+                  <div style={{ fontSize: '12px', color: '#F8FAFC',  textAlign: 'right' }}>{formatCompact(current,  currency)}</div>
+                  <div style={{ fontSize: '12px', color: gainColor,  textAlign: 'right' }}>{gain > 0 ? '+' : ''}{formatCompact(gain, currency)}</div>
+                  <div style={{ fontSize: '12px', color: gainColor,  textAlign: 'right', fontWeight: 500 }}>
+                    {xirr !== 0 ? (xirr > 0 ? '+' : '') + xirr.toFixed(1) + '%' : '0%'}
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* Total row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '6px', borderTop: '0.5px solid #1E2A3A', padding: '9px 6px 0', alignItems: 'center' }}>
+              <div style={{ fontSize: '12px', fontWeight: 500, color: '#F8FAFC' }}>Total</div>
+              <div style={{ fontSize: '12px', fontWeight: 500, color: '#64748B', textAlign: 'right' }}>{formatCompact(totalInvested, currency)}</div>
+              <div style={{ fontSize: '12px', fontWeight: 500, color: '#F8FAFC', textAlign: 'right' }}>{formatCompact(totalCurrent, currency)}</div>
+              <div style={{ fontSize: '12px', fontWeight: 500, color: totalGain >= 0 ? '#10B981' : '#EF4444', textAlign: 'right' }}>
+                {totalGain >= 0 ? '+' : ''}{formatCompact(totalGain, currency)}
+              </div>
+              <div style={{ fontSize: '12px', fontWeight: 500, color: totalGain >= 0 ? '#10B981' : '#EF4444', textAlign: 'right' }}>
+                {gainPct >= 0 ? '+' : ''}{gainPct.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
