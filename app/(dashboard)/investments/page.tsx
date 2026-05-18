@@ -23,7 +23,7 @@ interface Investment {
 }
 
 const INVESTMENT_TYPES = ['MF', 'Stocks', 'Crypto', 'Gold', 'F&O', 'Other']
-const CURRENCIES = ['AED', 'INR']
+const CURRENCIES = ['INR', 'AED']
 const PROJECTION_RATES = [10, 12, 15]
 const PROJECTION_YEARS = [1, 3, 5, 10]
 
@@ -82,7 +82,7 @@ function InvestmentModal({
   const [type, setType] = useState(initial?.type || 'MF')
   const [investedAmount, setInvestedAmount] = useState(initial?.invested_amount?.toString() || '')
   const [currentValue, setCurrentValue] = useState(initial?.current_value?.toString() || '')
-  const [currency, setCurrency] = useState(initial?.currency || 'AED')
+  const [currency, setCurrency] = useState(initial?.currency || 'INR')
   const [month, setMonth] = useState(initial?.month?.slice(0, 7) || '')
   const [goalId, setGoalId] = useState(initial?.goal_id || '')
   const [notes, setNotes] = useState(initial?.notes || '')
@@ -102,7 +102,7 @@ function InvestmentModal({
       setType('MF')
       setInvestedAmount('')
       setCurrentValue('')
-      setCurrency('AED')
+      setCurrency('INR')
       setMonth('')
       setGoalId('')
       setNotes('')

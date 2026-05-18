@@ -24,7 +24,7 @@ interface Goal {
   created_at: string
 }
 
-const CURRENCIES = ['AED', 'INR']
+const CURRENCIES = ['INR', 'AED']
 const RATES = [10, 12, 15]
 
 function daysRemaining(dateStr: string) {
@@ -64,7 +64,7 @@ function GoalModal({
 }) {
   const [name, setName] = useState(initial?.name || '')
   const [targetAmount, setTargetAmount] = useState(initial?.target_amount?.toString() || '')
-  const [currency, setCurrency] = useState(initial?.currency || 'AED')
+  const [currency, setCurrency] = useState(initial?.currency || 'INR')
   const [targetDate, setTargetDate] = useState(initial?.target_date?.slice(0, 10) || '')
   const [notes, setNotes] = useState(initial?.notes || '')
   const [isPrimary, setIsPrimary] = useState(initial?.is_primary || false)
@@ -84,7 +84,7 @@ function GoalModal({
     } else {
       setName('')
       setTargetAmount('')
-      setCurrency('AED')
+      setCurrency('INR')
       setTargetDate('')
       setNotes('')
       setIsPrimary(false)
@@ -245,9 +245,7 @@ function GoalCard({
     <div className="glass-card rounded-2xl overflow-hidden mb-4">
       {/* Banner image or gradient */}
       {goal.image_url ? (
-        <div className="w-full h-40 overflow-hidden">
-          <img src={goal.image_url} alt={goal.name} className="w-full h-full object-cover" />
-        </div>
+        <img src={goal.image_url} alt={goal.name} className="w-full object-cover block" style={{ height: '180px' }} />
       ) : (
         <div className={`w-full h-24 bg-gradient-to-r ${gradientForName(goal.name)} opacity-60`} />
       )}

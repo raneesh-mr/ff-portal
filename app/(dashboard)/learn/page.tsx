@@ -347,6 +347,4 @@ export default function LearnPage() {
       <div className="text-center mt-8 pb-4">
         <p className="text-xs text-slate-600">Progress is saved automatically as you click.</p>
       </div>
-    </div>
-  )
-}
+    <

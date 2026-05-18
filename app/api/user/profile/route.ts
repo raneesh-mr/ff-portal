@@ -38,14 +38,12 @@ export async function PUT(request: NextRequest) {
     await supabase.from('users').update(userUpdate).eq('id', session.userId)
   }
 
-  // Upsert user_profiles
+  // Upsert user_profiles (name/email live in users table, not here)
   const { data, error } = await supabase
     .from('user_profiles')
     .upsert(
       {
         ...profileFields,
-        name,
-        email,
         user_id: session.userId,
         updated_at: new Date().toISOString(),
       },

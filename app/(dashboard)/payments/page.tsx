@@ -65,7 +65,7 @@ function PaymentModal({
 }) {
   const [name, setName] = useState(initial?.name || '')
   const [amount, setAmount] = useState(initial?.amount?.toString() || '')
-  const [currency, setCurrency] = useState(initial?.currency || 'AED')
+  const [currency, setCurrency] = useState(initial?.currency || 'INR')
   const [dueDate, setDueDate] = useState(initial?.due_date?.slice(0, 10) || '')
   const [category, setCategory] = useState(initial?.category || 'Credit Card')
   const [paymentType, setPaymentType] = useState(initial?.payment_type || 'essential')
@@ -87,7 +87,7 @@ function PaymentModal({
     } else {
       setName('')
       setAmount('')
-      setCurrency('AED')
+      setCurrency('INR')
       setDueDate('')
       setCategory('Credit Card')
       setPaymentType('essential')

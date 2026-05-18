@@ -162,13 +162,15 @@ export default function SettingsPage() {
   async function saveProfile() {
     setSaving(true)
     try {
-      await fetch('/financial_freedom/api/user/profile', {
+      const res = await fetch('/financial_freedom/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
       })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2500)
+      }
     } finally {
       setSaving(false)
     }
