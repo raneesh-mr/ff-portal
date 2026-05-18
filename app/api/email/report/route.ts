@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 
   try {
     await resend.emails.send({
-      from: 'Financial Freedom <onboarding@resend.dev>',
+      from: 'My Financial Freedom <wealth@raneesh.net>',
       to: user.email,
       subject,
       html: `<!DOCTYPE html><html><body style="margin:0;background:#0A0E27;">${html}</body></html>`,
