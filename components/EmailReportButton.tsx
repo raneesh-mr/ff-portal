@@ -11,7 +11,7 @@ export default function EmailReportButton({ type, label }: { type: ReportType; l
     if (state === 'loading') return
     setState('loading')
     try {
-      const res = await fetch('/financial_freedom/api/email/report', {
+      const res = await fetch('/api/email/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type }),

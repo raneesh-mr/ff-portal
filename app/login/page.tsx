@@ -16,7 +16,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/financial_freedom/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

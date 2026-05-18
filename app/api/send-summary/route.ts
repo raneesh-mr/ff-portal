@@ -78,7 +78,7 @@ export async function POST() {
 
   <div style="text-align:center;padding:24px 0;border-top:1px solid #1E2A3A;margin-top:8px;">
     <p style="color:#475569;font-size:12px;margin:0;">Sent from My Financial Freedom Portal · ${new Date().toLocaleDateString()}</p>
-    <p style="color:#C9A84C;font-size:12px;margin:4px 0 0;">raneesh.net/financial_freedom</p>
+    <p style="color:#C9A84C;font-size:12px;margin:4px 0 0;">wealth.raneesh.net</p>
   </div>
 </div>
 </body>

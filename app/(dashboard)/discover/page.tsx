@@ -123,7 +123,7 @@ export default function DiscoverPage() {
   async function fetchLast() {
     setLoading(true)
     try {
-      const res = await fetch('/financial_freedom/api/ai-analysis')
+      const res = await fetch('/api/ai-analysis')
       const json = await res.json()
       setAnalysis(json.data || null)
     } finally {
@@ -137,7 +137,7 @@ export default function DiscoverPage() {
     setAnalysing(true)
     setError('')
     try {
-      const res = await fetch('/financial_freedom/api/ai-analysis', { method: 'POST' })
+      const res = await fetch('/api/ai-analysis', { method: 'POST' })
       const json = await res.json()
       if (json.error) {
         setError(json.error + (json.detail ? ': ' + json.detail : ''))
@@ -154,7 +154,7 @@ export default function DiscoverPage() {
   async function handleSendEmail() {
     setEmailSending(true)
     try {
-      await fetch('/financial_freedom/api/send-summary', { method: 'POST' })
+      await fetch('/api/send-summary', { method: 'POST' })
       setEmailSent(true)
       setTimeout(() => setEmailSent(false), 4000)
     } finally {

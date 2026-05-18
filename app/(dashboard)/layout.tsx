@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
 
   async function handleLogout() {
-    await fetch('/financial_freedom/api/auth/logout', { method: 'POST' })
+    await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/login')
   }
 
@@ -102,17 +102,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   'w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200',
                   active ? '' : ''
                 )} style={active ? {
-                  background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(245,208,128,0.1))',
-                  border: '1px solid rgba(201,168,76,0.3)'
-                } : {}}>
-                  <item.icon className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] font-medium truncate">{item.mobileLabel}</span>
-              </Link>
-            )
-          })}
-        </div>
-      </nav>
-    </div>
-  )
-}
+                  background: 'linear-gradient(135deg,

@@ -231,7 +231,7 @@ function GoalCard({
       return
     }
     try {
-      const res = await fetch(`/financial_freedom/api/goals/${goal.id}/history`)
+      const res = await fetch(`/api/goals/${goal.id}/history`)
       const json = await res.json()
       setHistory(json.data || [])
       setHistoryLoaded(true)
@@ -392,7 +392,7 @@ export default function GoalsPage() {
   async function fetchGoals() {
     setLoading(true)
     try {
-      const res = await fetch('/financial_freedom/api/goals')
+      const res = await fetch('/api/goals')
       const json = await res.json()
       setGoals(json.data || [])
     } finally {
@@ -408,7 +408,7 @@ export default function GoalsPage() {
       let savedId: string | null = null
 
       if (editGoal) {
-        const res = await fetch(`/financial_freedom/api/goals/${editGoal.id}`, {
+        const res = await fetch(`/api/goals/${editGoal.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -416,7 +416,7 @@ export default function GoalsPage() {
         const json = await res.json()
         savedId = json.data?.id || editGoal.id
       } else {
-        const res = await fetch('/financial_freedom/api/goals', {
+        const res = await fetch('/api/goals', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -428,7 +428,7 @@ export default function GoalsPage() {
       if (file && savedId) {
         const fd = new FormData()
         fd.append('file', file)
-        await fetch(`/financial_freedom/api/goals/${savedId}/upload`, { method: 'POST', body: fd })
+        await fetch(`/api/goals/${savedId}/upload`, { method: 'POST', body: fd })
       }
 
       setModalOpen(false)
@@ -441,7 +441,7 @@ export default function GoalsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this goal? This cannot be undone.')) return
-    await fetch(`/financial_freedom/api/goals/${id}`, { method: 'DELETE' })
+    await fetch(`/api/goals/${id}`, { method: 'DELETE' })
     await fetchGoals()
   }
 
@@ -502,11 +502,4 @@ export default function GoalsPage() {
       {saving && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="glass-card rounded-xl px-8 py-6 text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full mx-auto mb-3" />
-            <p className="text-slate-300">Saving...</p>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+            <div className="animate-spin w-8 h-8 border-2 bord

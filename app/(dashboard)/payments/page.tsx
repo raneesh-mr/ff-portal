@@ -282,8 +282,8 @@ export default function PaymentsPage() {
     setLoading(true)
     try {
       const [pRes, profileRes] = await Promise.all([
-        fetch('/financial_freedom/api/payments'),
-        fetch('/financial_freedom/api/user/profile'),
+        fetch('/api/payments'),
+        fetch('/api/user/profile'),
       ])
       const pJson = await pRes.json()
       setPayments(pJson.data || [])
@@ -328,13 +328,13 @@ export default function PaymentsPage() {
     setSaving(true)
     try {
       if (editPayment) {
-        await fetch(`/financial_freedom/api/payments/${editPayment.id}`, {
+        await fetch(`/api/payments/${editPayment.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
       } else {
-        await fetch('/financial_freedom/api/payments', {
+        await fetch('/api/payments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -350,12 +350,12 @@ export default function PaymentsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this payment?')) return
-    await fetch(`/financial_freedom/api/payments/${id}`, { method: 'DELETE' })
+    await fetch(`/api/payments/${id}`, { method: 'DELETE' })
     await fetchAll()
   }
 
   async function handleMarkPaid(id: string) {
-    await fetch(`/financial_freedom/api/payments/${id}`, {
+    await fetch(`/api/payments/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'paid' }),
@@ -496,11 +496,4 @@ export default function PaymentsPage() {
       {saving && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="glass-card rounded-xl px-8 py-6 text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full mx-auto mb-3" />
-            <p className="text-slate-300">Saving...</p>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+            <div className="animate-spin w-8 h-8 border-2 b

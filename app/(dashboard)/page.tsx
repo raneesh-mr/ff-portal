@@ -48,10 +48,10 @@ export default function Dashboard() {
     setLoading(true)
     try {
       const [goalsRes, invRes, payRes, rateRes] = await Promise.all([
-        fetch('/financial_freedom/api/goals'),
-        fetch('/financial_freedom/api/investments'),
-        fetch('/financial_freedom/api/payments'),
-        fetch('/financial_freedom/api/exchange-rate'),
+        fetch('/api/goals'),
+        fetch('/api/investments'),
+        fetch('/api/payments'),
+        fetch('/api/exchange-rate'),
       ])
       const [goals, investments, payments, rateData] = await Promise.all([
         goalsRes.json(), invRes.json(), payRes.json(), rateRes.json(),
@@ -312,3 +312,4 @@ export default function Dashboard() {
     </div>
   )
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                         

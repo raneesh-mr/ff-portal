@@ -122,9 +122,9 @@ export default function SettingsPage() {
       setLoading(true)
       try {
         const [profileRes, paymentsRes, rateRes] = await Promise.all([
-          fetch('/financial_freedom/api/user/profile'),
-          fetch('/financial_freedom/api/payments'),
-          fetch('/financial_freedom/api/exchange-rate'),
+          fetch('/api/user/profile'),
+          fetch('/api/payments'),
+          fetch('/api/exchange-rate'),
         ])
         if (profileRes.ok) {
           const j = await profileRes.json()
@@ -151,7 +151,7 @@ export default function SettingsPage() {
   async function fetchRate(force = false) {
     setRateLoading(true)
     try {
-      const res = await fetch(`/financial_freedom/api/exchange-rate${force ? '?force=true' : ''}`)
+      const res = await fetch(`/api/exchange-rate${force ? '?force=true' : ''}`)
       const j = await res.json()
       setRate({ rate: j.rate, fetched_at: j.fetched_at })
     } finally {
@@ -162,7 +162,7 @@ export default function SettingsPage() {
   async function saveProfile() {
     setSaving(true)
     try {
-      const res = await fetch('/financial_freedom/api/user/profile', {
+      const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
@@ -183,7 +183,7 @@ export default function SettingsPage() {
     setPwSaving(true)
     setPwMsg('')
     try {
-      const res = await fetch('/financial_freedom/api/auth/change-password', {
+      const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),

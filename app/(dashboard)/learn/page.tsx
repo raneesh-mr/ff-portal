@@ -253,7 +253,7 @@ export default function LearnPage() {
     async function fetchStatuses() {
       setLoading(true)
       try {
-        const res = await fetch('/financial_freedom/api/psychology')
+        const res = await fetch('/api/psychology')
         const json = await res.json()
         const map: Record<number, TrapStatusValue> = {}
         for (const item of json.data || []) {
@@ -271,7 +271,7 @@ export default function LearnPage() {
     // Optimistic update
     setStatuses(prev => ({ ...prev, [trapNumber]: status as TrapStatusValue }))
     try {
-      await fetch('/financial_freedom/api/psychology', {
+      await fetch('/api/psychology', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trap_number: trapNumber, status }),

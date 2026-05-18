@@ -344,8 +344,8 @@ export default function InvestmentsPage() {
     setLoading(true)
     try {
       const [invRes, goalRes] = await Promise.all([
-        fetch('/financial_freedom/api/investments'),
-        fetch('/financial_freedom/api/goals'),
+        fetch('/api/investments'),
+        fetch('/api/goals'),
       ])
       const invJson = await invRes.json()
       const goalJson = await goalRes.json()
@@ -378,13 +378,13 @@ export default function InvestmentsPage() {
     setSaving(true)
     try {
       if (editInv) {
-        await fetch(`/financial_freedom/api/investments/${editInv.id}`, {
+        await fetch(`/api/investments/${editInv.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
       } else {
-        await fetch('/financial_freedom/api/investments', {
+        await fetch('/api/investments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -400,7 +400,7 @@ export default function InvestmentsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this investment?')) return
-    await fetch(`/financial_freedom/api/investments/${id}`, { method: 'DELETE' })
+    await fetch(`/api/investments/${id}`, { method: 'DELETE' })
     await fetchAll()
   }
 
@@ -511,11 +511,4 @@ export default function InvestmentsPage() {
       {saving && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
           <div className="glass-card rounded-xl px-8 py-6 text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full mx-auto mb-3" />
-            <p className="text-slate-300">Saving...</p>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+            <div className="animate-spin w-8 h-8 border-
