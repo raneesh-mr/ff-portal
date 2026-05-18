@@ -41,8 +41,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 animate-pulse-gold" style={{ background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}>
             <TrendingUp className="w-8 h-8" style={{ color: '#0A0E27' }} />
           </div>
-          <h1 className="text-2xl font-bold mb-1 text-gold-gradient">My Financial Freedom</h1>
-          <p style={{ color: '#94A3B8', fontSize: '0.875rem' }}>Your journey to freedom starts here</p>
+          <h1 className="text-2xl font-bold mb-1 text-gold-gradient">Already Wealthy</h1>
+          <p style={{ color: '#94A3B8', fontSize: '0.875rem' }}>Your wealth is already in motion</p>
         </div>
         <div className="glass-card p-8 glow-gold">
           <h2 className="text-xl font-semibold mb-6" style={{ color: '#F8FAFC' }}>Welcome back</h2>
@@ -78,7 +78,7 @@ export default function LoginPage() {
             <p style={{ color: '#64748B', fontSize: '0.75rem' }}>Secured with end-to-end encryption</p>
           </div>
         </div>
-        <p className="text-center mt-6 text-xs" style={{ color: '#475569' }}>My Financial Freedom Portal · Private Access</p>
+        <p className="text-center mt-6 text-xs" style={{ color: '#475569' }}>Already Wealthy · Private Access</p>
       </div>
     </div>
   )

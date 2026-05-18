@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Target, TrendingUp, CreditCard, BookOpen, Sparkles, Settings, LogOut, TrendingUpIcon } from 'lucide-react'
+import { LayoutDashboard, Target, TrendingUp, CreditCard, BookOpen, Sparkles, Settings, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -34,11 +34,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="hidden md:flex flex-col w-60 flex-shrink-0 py-6 px-3" style={{ borderRight: '1px solid #1E2A3A', background: '#0A0E1F' }}>
         <div className="flex items-center gap-3 px-3 mb-8">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}>
-            <TrendingUpIcon className="w-4 h-4" style={{ color: '#0A0E27' }} />
+            <span style={{ color: '#0A0E27', fontWeight: 800, fontSize: '16px', lineHeight: 1 }}>A</span>
           </div>
           <div>
-            <p className="text-xs font-bold leading-none text-gold-gradient">MY FINANCIAL</p>
-            <p className="text-xs font-bold leading-none text-gold-gradient">FREEDOM</p>
+            <p className="text-xs font-bold leading-none text-gold-gradient">ALREADY</p>
+            <p className="text-xs font-bold leading-none text-gold-gradient">WEALTHY</p>
           </div>
         </div>
 
@@ -76,11 +76,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           href="https://www.raneesh.net"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 text-center block transition-opacity hover:opacity-80"
-          style={{ fontSize: '10px', color: '#334155', lineHeight: 1.5 }}
+          className="mt-2 flex items-center gap-3 px-3 py-1.5 transition-opacity hover:opacity-80"
+          style={{ fontSize: '10px', color: '#334155', lineHeight: 1.5, textDecoration: 'none' }}
         >
-          made with passion<br />
-          <span style={{ color: '#475569' }}>www.raneesh.net</span>
+          made with passion · <span style={{ color: '#475569' }}>www.raneesh.net</span>
         </a>
       </aside>
 

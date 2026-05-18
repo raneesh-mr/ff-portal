@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "My Financial Freedom",
-  description: "Track your investments, goals, and journey to financial freedom.",
+  title: "Already Wealthy",
+  description: "Track your investments, goals, and manifest your wealth.",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 

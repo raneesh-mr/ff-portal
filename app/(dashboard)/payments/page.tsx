@@ -337,7 +337,7 @@ export default function PaymentsPage() {
         await fetch('/api/payments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, status: 'due' }),
         })
       }
       setModalOpen(false)

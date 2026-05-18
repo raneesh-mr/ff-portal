@@ -309,6 +309,42 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ── Upcoming Payments ── */}
+      {data && data.payments.filter(p => p.status !== 'paid').length > 0 && (() => {
+        const upcoming = data.payments
+          .filter(p => p.status !== 'paid')
+          .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+          .slice(0, 5)
+        return (
+          <div style={card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={secLbl}>UPCOMING PAYMENTS</div>
+              <a href="/payments" style={{ fontSize: '11px', color: '#C9A84C', textDecoration: 'none' }}>View all →</a>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {upcoming.map(p => {
+                const isOverdue = p.status === 'overdue'
+                const dueDate = p.due_date ? new Date(p.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'
+                return (
+                  <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '12px', background: '#0D1420', border: `0.5px solid ${isOverdue ? 'rgba(239,68,68,0.3)' : '#1E2A3A'}`, borderRadius: '8px', padding: '9px 12px', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#F8FAFC' }}>{p.icon ? `${p.icon} ` : ''}{p.name}</div>
+                      <div style={{ fontSize: '10px', color: '#64748B' }}>{p.category || ''}</div>
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 500, color: '#F8FAFC', textAlign: 'right' }}>
+                      {p.currency} {Number(p.amount).toLocaleString()}
+                    </div>
+                    <div style={{ fontSize: '11px', color: isOverdue ? '#EF4444' : '#F59E0B', textAlign: 'right', minWidth: '56px' }}>
+                      {isOverdue ? 'Overdue' : dueDate}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+
     </div>
   )
 }

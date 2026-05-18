@@ -28,7 +28,7 @@ export async function POST() {
 <body style="margin:0;padding:0;background:#0A0E27;font-family:Inter,Arial,sans-serif;">
 <div style="max-width:600px;margin:0 auto;padding:24px;">
   <div style="background:linear-gradient(135deg,#C9A84C,#F5D080);border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;">
-    <h1 style="margin:0;color:#0A0E27;font-size:24px;font-weight:800;">My Financial Freedom</h1>
+    <h1 style="margin:0;color:#0A0E27;font-size:24px;font-weight:800;">Already Wealthy</h1>
     <p style="margin:8px 0 0;color:#0A0E27;opacity:0.7;font-size:14px;">Portfolio Summary · ${new Date().toLocaleDateString('en-AE', { dateStyle: 'long' })}</p>
   </div>
 
@@ -77,7 +77,7 @@ export async function POST() {
   </div>` : ''}
 
   <div style="text-align:center;padding:24px 0;border-top:1px solid #1E2A3A;margin-top:8px;">
-    <p style="color:#475569;font-size:12px;margin:0;">Sent from My Financial Freedom Portal · ${new Date().toLocaleDateString()}</p>
+    <p style="color:#475569;font-size:12px;margin:0;">Sent from Already Wealthy · ${new Date().toLocaleDateString()}</p>
     <p style="color:#C9A84C;font-size:12px;margin:4px 0 0;">wealth.raneesh.net</p>
   </div>
 </div>
@@ -86,9 +86,9 @@ export async function POST() {
 
   try {
     await resend.emails.send({
-      from: 'Financial Freedom <onboarding@resend.dev>',
+      from: 'Already Wealthy <onboarding@resend.dev>',
       to: process.env.RESEND_TO_EMAIL!,
-      subject: `Your Financial Freedom Summary — ${new Date().toLocaleDateString('en-AE', { month: 'long', year: 'numeric' })}`,
+      subject: `Already Wealthy — Portfolio Summary · ${new Date().toLocaleDateString('en-AE', { month: 'long', year: 'numeric' })}`,
       html,
     })
     return NextResponse.json({ success: true })

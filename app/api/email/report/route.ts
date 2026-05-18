@@ -16,13 +16,13 @@ function fmt(n: number, currency = 'INR') {
 const BASE = `
   <div style="max-width:600px;margin:0 auto;padding:24px;font-family:Inter,Arial,sans-serif;background:#0A0E27;">
     <div style="background:linear-gradient(135deg,#C9A84C,#F5D080);border-radius:12px;padding:20px 24px;margin-bottom:20px;">
-      <p style="margin:0;color:#0A0E27;font-size:11px;font-weight:600;letter-spacing:0.05em;opacity:0.7;">MY FINANCIAL FREEDOM</p>
+      <p style="margin:0;color:#0A0E27;font-size:11px;font-weight:600;letter-spacing:0.05em;opacity:0.7;">ALREADY WEALTHY</p>
       <h1 style="margin:4px 0 0;color:#0A0E27;font-size:20px;font-weight:800;">{{TITLE}}</h1>
       <p style="margin:6px 0 0;color:#0A0E27;opacity:0.6;font-size:12px;">{{DATE}}</p>
     </div>
     {{BODY}}
     <div style="text-align:center;padding-top:20px;border-top:0.5px solid #1E2A3A;margin-top:8px;">
-      <p style="color:#475569;font-size:11px;margin:0;">My Financial Freedom Portal</p>
+      <p style="color:#475569;font-size:11px;margin:0;">Already Wealthy</p>
       <p style="color:#C9A84C;font-size:11px;margin:4px 0 0;">made with passion · www.raneesh.net</p>
     </div>
   </div>
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const pct      = target > 0 ? ((current / target) * 100).toFixed(1) : '0'
 
     title   = 'Portfolio Summary'
-    subject = `Financial Freedom — Portfolio Summary · ${date}`
+    subject = `Already Wealthy — Portfolio Summary · ${date}`
     body = CARD(`
       ${SECTION('PORTFOLIO')}
       ${ROW('Total Target',  fmt(target,  'INR'))}
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
   } else if (type === 'goals') {
     const { data: goals } = await supabase.from('goals').select('*').eq('user_id', session.userId)
     title   = 'Goals Report'
-    subject = `Financial Freedom — Goals Report · ${date}`
+    subject = `Already Wealthy — Goals Report · ${date}`
     body = (goals || []).map(g =>
       CARD(`
         <p style="font-size:14px;font-weight:600;color:#F8FAFC;margin:0 0 10px;">${g.is_primary ? '★ ' : ''}${g.name}</p>
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const current  = investments?.reduce((s, i) => s + i.current_value,   0) || 0
     const gain     = current - invested
     title   = 'Investment Breakdown'
-    subject = `Financial Freedom — Investment Breakdown · ${date}`
+    subject = `Already Wealthy — Investment Breakdown · ${date}`
     body = CARD(`
       ${SECTION('TOTALS')}
       ${ROW('Total Invested', fmt(invested, 'INR'))}
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       .from('payments').select('*').eq('user_id', session.userId).neq('status', 'paid')
       .order('due_date', { ascending: true })
     title   = 'Upcoming Payments'
-    subject = `Financial Freedom — Upcoming Payments · ${date}`
+    subject = `Already Wealthy — Upcoming Payments · ${date}`
     body = payments?.length
       ? payments.map(p => CARD(`
           <p style="font-size:13px;font-weight:600;color:#F8FAFC;margin:0 0 8px;">${p.icon || ''} ${p.name}</p>
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 
   try {
     await resend.emails.send({
-      from: 'My Financial Freedom <wealth@raneesh.net>',
+      from: 'Already Wealthy <wealth@raneesh.net>',
       to: user.email,
       subject,
       html: `<!DOCTYPE html><html><body style="margin:0;background:#0A0E27;">${html}</body></html>`,
