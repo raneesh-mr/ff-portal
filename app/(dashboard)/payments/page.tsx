@@ -58,11 +58,13 @@ function PaymentModal({
   onClose,
   onSave,
   initial,
+  error,
 }: {
   open: boolean
   onClose: () => void
   onSave: (data: Partial<Payment>) => void
   initial?: Payment | null
+  error?: string
 }) {
   const [name, setName] = useState(initial?.name || '')
   const [amount, setAmount] = useState(initial?.amount?.toString() || '')
@@ -179,6 +181,11 @@ function PaymentModal({
             <textarea className="ff-input min-h-[64px] resize-none" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes..." />
           </div>
 
+          {error && (
+            <div className="rounded-xl p-3 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#F87171' }}>
+              {error}
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="btn-ghost flex-1">Cancel</button>
             <button type="submit" className="btn-gold flex-1">{initial ? 'Save Changes' : 'Add Payment'}</button>
@@ -274,6 +281,7 @@ export default function PaymentsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editPayment, setEditPayment] = useState<Payment | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [statusTab, setStatusTab] = useState('All')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [surplus, setSurplus] = useState(0)
@@ -326,23 +334,32 @@ export default function PaymentsPage() {
 
   async function handleSave(data: Partial<Payment>) {
     setSaving(true)
+    setSaveError('')
     try {
+      let res: Response
       if (editPayment) {
-        await fetch(`/api/payments/${editPayment.id}`, {
+        res = await fetch(`/api/payments/${editPayment.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
       } else {
-        await fetch('/api/payments', {
+        res = await fetch('/api/payments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...data, status: 'due' }),
         })
       }
+      const json = await res.json()
+      if (!res.ok) {
+        setSaveError(json.error || 'Save failed. Check your database.')
+        return
+      }
       setModalOpen(false)
       setEditPayment(null)
       await fetchAll()
+    } catch (e) {
+      setSaveError(String(e))
     } finally {
       setSaving(false)
     }
@@ -488,9 +505,10 @@ export default function PaymentsPage() {
 
       <PaymentModal
         open={modalOpen}
-        onClose={() => { setModalOpen(false); setEditPayment(null) }}
+        onClose={() => { setModalOpen(false); setEditPayment(null); setSaveError('') }}
         onSave={handleSave}
         initial={editPayment}
+        error={saveError}
       />
 
       {saving && (

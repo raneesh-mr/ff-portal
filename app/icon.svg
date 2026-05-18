@@ -6,5 +6,6 @@
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#gold)"/>
-  <text x="16" y="23" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#0A0E27">A</text>
+  <polyline points="4,22 12,14 17,19 28,8" fill="none" stroke="#0A0E27" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="22,8 28,8 28,14" fill="none" stroke="#0A0E27" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
