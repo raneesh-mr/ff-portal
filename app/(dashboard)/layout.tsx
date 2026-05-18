@@ -32,13 +32,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen overflow-hidden" style={{ background: '#0A0E27' }}>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-60 flex-shrink-0 py-6 px-3" style={{ borderRight: '1px solid #1E2A3A', background: '#0A0E1F' }}>
-        <div className="flex items-center gap-3 px-3 mb-8">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}>
-            <span style={{ color: '#0A0E27', fontWeight: 800, fontSize: '16px', lineHeight: 1 }}>A</span>
+        <div className="flex items-start gap-3 px-3 mb-8">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ border: '1px solid rgba(201,168,76,0.4)', background: 'transparent' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
           </div>
           <div>
-            <p className="text-xs font-bold leading-none text-gold-gradient">ALREADY</p>
-            <p className="text-xs font-bold leading-none text-gold-gradient">WEALTHY</p>
+            <p style={{ fontSize: '10px', fontWeight: 600, color: '#94A3B8', letterSpacing: '0.06em', lineHeight: 1.3, margin: 0 }}>My Financial</p>
+            <p style={{ fontSize: '10px', fontWeight: 600, color: '#94A3B8', letterSpacing: '0.06em', lineHeight: 1.3, margin: 0 }}>Freedom</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '5px' }}>
+              <div style={{ width: '16px', height: '0.5px', background: '#C9A84C', flexShrink: 0 }} />
+              <p style={{ fontSize: '8px', color: '#C9A84C', fontStyle: 'italic', letterSpacing: '0.06em', margin: 0 }}>Already Wealthy</p>
+            </div>
           </div>
         </div>
 
