@@ -27,14 +27,14 @@ export async function GET(request: NextRequest) {
 
   // Fetch live rate (AED to INR)
   try {
-    const res = await fetch('https://api.frankfurter.app/latest?from=AED&to=INR')
+    const res = await fetch('https://open.er-api.com/v6/latest/AED')
     const json = await res.json()
-    const rate = json.rates?.INR || 24
+    const rate = json.rates?.INR || 26
 
     await supabase.from('exchange_rates').insert({ from_currency: 'AED', to_currency: 'INR', rate })
 
     return NextResponse.json({ rate, fetched_at: new Date().toISOString(), userName: session?.name || 'User' })
   } catch {
-    return NextResponse.json({ rate: 24, fetched_at: new Date().toISOString(), userName: session?.name || 'User' })
+    return NextResponse.json({ rate: 26, fetched_at: new Date().toISOString(), userName: session?.name || 'User' })
   }
 }
