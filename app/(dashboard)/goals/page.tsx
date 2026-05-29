@@ -301,8 +301,8 @@ function GoalCard({
           </div>
           <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
             <div
-              className="h-full bg-gold-gradient rounded-full transition-all duration-1000"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-full transition-all duration-1000"
+              style={{ width: `${progress}%`, background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}
             />
           </div>
         </div>

@@ -188,24 +188,55 @@ export default function DiscoverPage() {
       const totalCurrent = investments.reduce((s, i) => s + i.current_value, 0)
       const gainPct = totalInvested > 0 ? (((totalCurrent - totalInvested) / totalInvested) * 100).toFixed(1) : '0'
 
-      const prompt = `You are a personal financial freedom advisor. Analyze this user's complete financial data and provide specific, actionable insights.
+      const fmt = (n: number, cur: string) => {
+        const sym = cur === 'INR' ? '₹' : 'AED '
+        if (n >= 10000000) return `${sym}${(n / 10000000).toFixed(1)}Cr`
+        if (n >= 100000) return `${sym}${(n / 100000).toFixed(1)}L`
+        if (n >= 1000) return `${sym}${(n / 1000).toFixed(1)}K`
+        return `${sym}${n.toFixed(0)}`
+      }
 
-User: ${userName}
-Total Portfolio: AED ${totalCurrent.toFixed(0)} (invested: AED ${totalInvested.toFixed(0)}, gain: ${gainPct}%)
-Goals: ${JSON.stringify(goals.map(g => ({ name: g.name, target: g.target_amount, currency: g.currency, deadline: g.target_date, isPrimary: g.is_primary })))}
-Investments: ${JSON.stringify(investments.map(i => ({ platform: i.platform, type: i.type, invested: i.invested_amount, current: i.current_value, currency: i.currency })))}
-Monthly Payments: ${JSON.stringify(payments.map(p => ({ name: p.name, amount: p.amount, category: p.category, type: p.payment_type, status: p.status })))}
-Income Profile: ${JSON.stringify({ yearlyAED: profile?.yearly_income_aed, yearlyINR: profile?.yearly_income_inr, monthlyTakehome: profile?.monthly_takehome_aed, riskTolerance: profile?.risk_tolerance })}
+      const goalLines = goals.map(g =>
+        `• ${g.name} — Target ${fmt(g.target_amount, g.currency)} by ${new Date(g.target_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}${g.is_primary ? ' (Primary)' : ''}`
+      ).join('\n')
 
-Respond ONLY with valid JSON in this exact format, no other text:
-{
-  "whereYouStand": [{"goal": "goal name", "status": "on_track|at_risk|overdue", "message": "2-3 sentence specific assessment", "percentage": 44}],
-  "whatsWorking": [{"title": "short title", "detail": "1-2 lines of what is working well and why"}],
-  "holdingYouBack": [{"title": "short title", "detail": "specific gap or risk with numbers", "severity": "high|medium|low"}],
-  "nextActions": [{"priority": 1, "action": "Specific action with numbers", "impact": "What achieving this does", "timeline": "When/how often"}]
-}
+      const invLines = investments.map(i => {
+        const gain = i.current_value - i.invested_amount
+        return `• ${i.platform} (${i.type}) — Invested ${fmt(i.invested_amount, i.currency)} | Current ${fmt(i.current_value, i.currency)} | ${gain >= 0 ? 'Gain' : 'Loss'} ${fmt(Math.abs(gain), i.currency)}`
+      }).join('\n')
 
-Be specific to their actual platforms and real amounts. Maximum 3 items in whatsWorking, 3 in holdingYouBack, 3 in nextActions.`
+      const payLines = payments.length > 0
+        ? payments.map(p => `• ${p.name} — ${p.currency === 'INR' ? '₹' : 'AED '}${p.amount.toLocaleString()} (${p.payment_type}, ${p.status})`).join('\n')
+        : '• None recorded'
+
+      const prompt = `You are a personal financial freedom advisor for ${userName}.
+
+Analyze the financial data below and write a clear, conversational report. Use headings, bullet points, and plain English. No JSON. Write as if you're a trusted advisor presenting findings in a meeting.
+
+--- FINANCIAL DATA ---
+Total Portfolio: AED ${Number(totalCurrent).toLocaleString()} (invested: AED ${Number(totalInvested).toLocaleString()} | gain: ${gainPct}%)
+Monthly Take-home: AED ${profile?.monthly_takehome_aed?.toLocaleString() ?? 'Not set'} | Risk Tolerance: ${profile?.risk_tolerance ?? 'Not set'}
+
+GOALS:
+${goalLines}
+
+INVESTMENTS:
+${invLines}
+
+MONTHLY PAYMENTS:
+${payLines}
+
+INCOME: ${profile?.yearly_income_aed ? `AED ${profile.yearly_income_aed.toLocaleString()}/year` : 'Not set'} | AED ${profile?.monthly_takehome_aed?.toLocaleString() ?? '—'}/month take-home
+--- END OF DATA ---
+
+Write your report with these sections:
+1. **Where You Stand** — assess each goal: on track, at risk, or behind. Include % progress estimate and time left.
+2. **What's Working** — 3 specific positives with platform names and numbers.
+3. **What's Holding You Back** — 3 specific risks or gaps with real numbers. Flag severity.
+4. **Your 3 Next Actions** — prioritised steps with exact amounts, platforms, and timelines.
+5. **One-Line Wealth Verdict** — a single honest sentence summarising where ${userName} stands today.
+
+Be direct, specific, and use the actual platform names and amounts throughout.`
 
       await navigator.clipboard.writeText(prompt)
       setCopied(true)

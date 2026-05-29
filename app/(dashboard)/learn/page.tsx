@@ -308,8 +308,8 @@ export default function LearnPage() {
         </div>
         <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
           <div
-            className="h-full bg-gold-gradient rounded-full transition-all duration-500"
-            style={{ width: `${(addressedCount / totalTraps) * 100}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${(addressedCount / totalTraps) * 100}%`, background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}
           />
         </div>
         <div className="flex gap-4 mt-3 text-xs">
