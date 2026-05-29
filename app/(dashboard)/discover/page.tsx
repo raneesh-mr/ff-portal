@@ -42,8 +42,8 @@ interface Analysis {
 }
 
 interface FinancialData {
-  goals: { name: string; target_amount: number; currency: string; target_date: string; is_primary: boolean }[]
-  investments: { platform: string; type: string; invested_amount: number; current_value: number; currency: string }[]
+  goals: { id: string; name: string; target_amount: number; currency: string; target_date: string; is_primary: boolean }[]
+  investments: { platform: string; type: string; invested_amount: number; current_value: number; currency: string; goal_id: string | null }[]
   payments: { name: string; amount: number; currency: string; category: string; payment_type: string; status: string }[]
   profile: { yearly_income_aed?: number; yearly_income_inr?: number; monthly_takehome_aed?: number; risk_tolerance?: string } | null
   userName: string
@@ -196,13 +196,25 @@ export default function DiscoverPage() {
         return `${sym}${n.toFixed(0)}`
       }
 
-      const goalLines = goals.map(g =>
-        `• ${g.name} — Target ${fmt(g.target_amount, g.currency)} by ${new Date(g.target_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}${g.is_primary ? ' (Primary)' : ''}`
-      ).join('\n')
+      const goalLines = goals.map(g => {
+        const linked = investments.filter(i => i.goal_id === g.id)
+        const goalCurrent = linked.reduce((s, i) => s + i.current_value, 0)
+        const goalPct = g.target_amount > 0 && goalCurrent > 0
+          ? Math.min((goalCurrent / g.target_amount) * 100, 100).toFixed(1)
+          : null
+        const linkedStr = linked.length > 0
+          ? ` | Linked: ${linked.map(i => i.platform).join(', ')} = ${fmt(goalCurrent, g.currency)} current`
+          : ' | No investments linked'
+        const progressStr = goalPct
+          ? ` | Progress: ${goalPct}% (${fmt(goalCurrent, g.currency)} of ${fmt(g.target_amount, g.currency)})`
+          : ' | Progress: 0%'
+        return `• ${g.name} — Target ${fmt(g.target_amount, g.currency)} by ${new Date(g.target_date).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}${g.is_primary ? ' (Primary)' : ''}${progressStr}${linkedStr}`
+      }).join('\n')
 
       const invLines = investments.map(i => {
         const gain = i.current_value - i.invested_amount
-        return `• ${i.platform} (${i.type}) — Invested ${fmt(i.invested_amount, i.currency)} | Current ${fmt(i.current_value, i.currency)} | ${gain >= 0 ? 'Gain' : 'Loss'} ${fmt(Math.abs(gain), i.currency)}`
+        const platformLabel = i.platform.toLowerCase().includes(i.type.toLowerCase()) ? i.platform : `${i.platform} (${i.type})`
+        return `• ${platformLabel} — Invested ${fmt(i.invested_amount, i.currency)} | Current ${fmt(i.current_value, i.currency)} | ${gain >= 0 ? 'Gain' : 'Loss'} ${fmt(Math.abs(gain), i.currency)}`
       }).join('\n')
 
       const payLines = payments.length > 0
