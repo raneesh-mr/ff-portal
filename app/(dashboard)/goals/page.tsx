@@ -299,11 +299,14 @@ function GoalCard({
             <span className="text-slate-400">Progress</span>
             <span className="font-semibold text-yellow-400">{progress.toFixed(1)}%</span>
           </div>
-          <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-1000"
-              style={{ width: `${progress}%`, background: 'linear-gradient(135deg, #C9A84C, #F5D080)' }}
-            />
+          <div style={{ height: '8px', background: '#1E2A3A', borderRadius: '99px', overflow: 'hidden' }}>
+            <div style={{
+              height: '8px',
+              width: `${progress}%`,
+              background: 'linear-gradient(135deg, #C9A84C, #F5D080)',
+              borderRadius: '99px',
+              transition: 'width 1s ease',
+            }} />
           </div>
         </div>
 
