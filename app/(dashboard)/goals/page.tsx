@@ -25,6 +25,13 @@ interface Goal {
   created_at: string
 }
 
+interface Investment {
+  id: string
+  goal_id: string | null
+  current_value: number
+  currency: string
+}
+
 const CURRENCIES = ['INR', 'AED']
 const RATES = [10, 12, 15]
 
@@ -207,10 +214,12 @@ function GoalModal({
 
 function GoalCard({
   goal,
+  investments,
   onEdit,
   onDelete,
 }: {
   goal: Goal
+  investments: Investment[]
   onEdit: (g: Goal) => void
   onDelete: (id: string) => void
 }) {
@@ -219,7 +228,11 @@ function GoalCard({
   const [history, setHistory] = useState<GoalHistory[]>([])
   const [historyLoaded, setHistoryLoaded] = useState(false)
 
-  const currentAmount = goal.current_amount || 0
+  // Compute current value from linked investments (live, not stale DB field)
+  const linkedInvestments = investments.filter(i => i.goal_id === goal.id)
+  const currentAmount = linkedInvestments.length > 0
+    ? linkedInvestments.reduce((s, i) => s + i.current_value, 0)
+    : (goal.current_amount || 0)
   const progress = goal.target_amount > 0 ? Math.min((currentAmount / goal.target_amount) * 100, 100) : 0
   const days = goal.target_date ? daysRemaining(goal.target_date) : null
   const isOverdue = days !== null && days < 0
@@ -384,6 +397,7 @@ function GoalCard({
 
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([])
+  const [investments, setInvestments] = useState<Investment[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editGoal, setEditGoal] = useState<Goal | null>(null)
@@ -392,9 +406,13 @@ export default function GoalsPage() {
   async function fetchGoals() {
     setLoading(true)
     try {
-      const res = await fetch('/api/goals')
-      const json = await res.json()
-      setGoals(json.data || [])
+      const [goalsRes, invRes] = await Promise.all([
+        fetch('/api/goals'),
+        fetch('/api/investments'),
+      ])
+      const [goalsJson, invJson] = await Promise.all([goalsRes.json(), invRes.json()])
+      setGoals(goalsJson.data || [])
+      setInvestments(invJson.data || [])
     } finally {
       setLoading(false)
     }
@@ -488,7 +506,7 @@ export default function GoalsPage() {
         </div>
       ) : (
         goals.map(g => (
-          <GoalCard key={g.id} goal={g} onEdit={openEdit} onDelete={handleDelete} />
+          <GoalCard key={g.id} goal={g} investments={investments} onEdit={openEdit} onDelete={handleDelete} />
         ))
       )}
 

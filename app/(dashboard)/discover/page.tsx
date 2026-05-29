@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, ChevronDown, ChevronUp, Mail, RefreshCw } from 'lucide-react'
+import { Sparkles, ChevronDown, ChevronUp, Mail, RefreshCw, Copy, Check } from 'lucide-react'
 
 interface GoalStatus {
   goal: string
@@ -39,6 +39,14 @@ interface Analysis {
   id: string
   analysis_json: AnalysisJson
   created_at: string
+}
+
+interface FinancialData {
+  goals: { name: string; target_amount: number; currency: string; target_date: string; is_primary: boolean }[]
+  investments: { platform: string; type: string; invested_amount: number; current_value: number; currency: string }[]
+  payments: { name: string; amount: number; category: string; payment_type: string; status: string }[]
+  profile: { yearly_income_aed?: number; yearly_income_inr?: number; monthly_takehome_aed?: number; risk_tolerance?: string } | null
+  userName: string
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -119,13 +127,33 @@ export default function DiscoverPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [emailSending, setEmailSending] = useState(false)
   const [error, setError] = useState('')
+  const [copying, setCopying] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [financialData, setFinancialData] = useState<FinancialData | null>(null)
 
   async function fetchLast() {
     setLoading(true)
     try {
-      const res = await fetch('/api/ai-analysis')
-      const json = await res.json()
-      setAnalysis(json.data || null)
+      const [analysisRes, goalsRes, invRes, paymentsRes, profileRes, rateRes] = await Promise.all([
+        fetch('/api/ai-analysis'),
+        fetch('/api/goals'),
+        fetch('/api/investments'),
+        fetch('/api/payments'),
+        fetch('/api/user/profile'),
+        fetch('/api/exchange-rate'),
+      ])
+      const [analysisJson, goalsJson, invJson, paymentsJson, profileJson, rateJson] = await Promise.all([
+        analysisRes.json(), goalsRes.json(), invRes.json(),
+        paymentsRes.json(), profileRes.json(), rateRes.json(),
+      ])
+      setAnalysis(analysisJson.data || null)
+      setFinancialData({
+        goals: goalsJson.data || [],
+        investments: invJson.data || [],
+        payments: paymentsJson.data || [],
+        profile: profileJson.data || null,
+        userName: rateJson.userName || 'User',
+      })
     } finally {
       setLoading(false)
     }
@@ -148,6 +176,42 @@ export default function DiscoverPage() {
       setError(String(e))
     } finally {
       setAnalysing(false)
+    }
+  }
+
+  async function handleCopyPrompt() {
+    if (!financialData) return
+    setCopying(true)
+    try {
+      const { goals, investments, payments, profile, userName } = financialData
+      const totalInvested = investments.reduce((s, i) => s + i.invested_amount, 0)
+      const totalCurrent = investments.reduce((s, i) => s + i.current_value, 0)
+      const gainPct = totalInvested > 0 ? (((totalCurrent - totalInvested) / totalInvested) * 100).toFixed(1) : '0'
+
+      const prompt = `You are a personal financial freedom advisor. Analyze this user's complete financial data and provide specific, actionable insights.
+
+User: ${userName}
+Total Portfolio: AED ${totalCurrent.toFixed(0)} (invested: AED ${totalInvested.toFixed(0)}, gain: ${gainPct}%)
+Goals: ${JSON.stringify(goals.map(g => ({ name: g.name, target: g.target_amount, currency: g.currency, deadline: g.target_date, isPrimary: g.is_primary })))}
+Investments: ${JSON.stringify(investments.map(i => ({ platform: i.platform, type: i.type, invested: i.invested_amount, current: i.current_value, currency: i.currency })))}
+Monthly Payments: ${JSON.stringify(payments.map(p => ({ name: p.name, amount: p.amount, category: p.category, type: p.payment_type, status: p.status })))}
+Income Profile: ${JSON.stringify({ yearlyAED: profile?.yearly_income_aed, yearlyINR: profile?.yearly_income_inr, monthlyTakehome: profile?.monthly_takehome_aed, riskTolerance: profile?.risk_tolerance })}
+
+Respond ONLY with valid JSON in this exact format, no other text:
+{
+  "whereYouStand": [{"goal": "goal name", "status": "on_track|at_risk|overdue", "message": "2-3 sentence specific assessment", "percentage": 44}],
+  "whatsWorking": [{"title": "short title", "detail": "1-2 lines of what is working well and why"}],
+  "holdingYouBack": [{"title": "short title", "detail": "specific gap or risk with numbers", "severity": "high|medium|low"}],
+  "nextActions": [{"priority": 1, "action": "Specific action with numbers", "impact": "What achieving this does", "timeline": "When/how often"}]
+}
+
+Be specific to their actual platforms and real amounts. Maximum 3 items in whatsWorking, 3 in holdingYouBack, 3 in nextActions.`
+
+      await navigator.clipboard.writeText(prompt)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 3000)
+    } finally {
+      setCopying(false)
     }
   }
 
@@ -181,24 +245,40 @@ export default function DiscoverPage() {
         )}
       </div>
 
-      {/* Analyse button */}
-      <button
-        onClick={handleAnalyse}
-        disabled={analysing}
-        className="btn-gold w-full py-4 text-base font-bold flex items-center justify-center gap-2 mb-6 disabled:opacity-60"
-      >
-        {analysing ? (
-          <>
-            <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full" />
-            Analysing your finances...
-          </>
-        ) : (
-          <>
-            <RefreshCw size={18} />
-            {analysis ? 'Re-analyse Now' : 'Analyse Now'}
-          </>
-        )}
-      </button>
+      {/* Buttons row */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={handleAnalyse}
+          disabled={analysing}
+          className="btn-gold flex-1 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          {analysing ? (
+            <>
+              <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full" />
+              Analysing...
+            </>
+          ) : (
+            <>
+              <RefreshCw size={18} />
+              {analysis ? 'Re-analyse Now' : 'Analyse Now'}
+            </>
+          )}
+        </button>
+        <button
+          onClick={handleCopyPrompt}
+          disabled={copying}
+          className="btn-ghost py-4 px-5 flex items-center justify-center gap-2 disabled:opacity-60 flex-shrink-0"
+          title="Copy prompt to use in ChatGPT, Claude, or any other AI"
+        >
+          {copied ? (
+            <><Check size={16} className="text-emerald-400" /><span className="text-emerald-400 text-sm font-medium">Copied!</span></>
+          ) : copying ? (
+            <><div className="animate-spin w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full" /><span className="text-sm">Loading...</span></>
+          ) : (
+            <><Copy size={16} /><span className="text-sm font-medium">Copy Prompt</span></>
+          )}
+        </button>
+      </div>
 
       {error && (
         <div className="rounded-xl border border-red-700/50 bg-red-950/30 p-4 mb-6 text-sm text-red-400">
