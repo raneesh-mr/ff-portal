@@ -44,7 +44,7 @@ interface Analysis {
 interface FinancialData {
   goals: { name: string; target_amount: number; currency: string; target_date: string; is_primary: boolean }[]
   investments: { platform: string; type: string; invested_amount: number; current_value: number; currency: string }[]
-  payments: { name: string; amount: number; category: string; payment_type: string; status: string }[]
+  payments: { name: string; amount: number; currency: string; category: string; payment_type: string; status: string }[]
   profile: { yearly_income_aed?: number; yearly_income_inr?: number; monthly_takehome_aed?: number; risk_tolerance?: string } | null
   userName: string
 }
